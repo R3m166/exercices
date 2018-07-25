@@ -182,9 +182,4 @@ class Personne
     puts "Vous avez gagné !"
   else
     puts "Vous avez perdu !"
-  end
-  
-  
-  
-  
-  
+  end  
