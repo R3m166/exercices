@@ -1,12 +1,16 @@
 require_relative "./app/famille"
 
-#Affichage de la liste existante
-file = File.read("livret.json")
-membres = file.split(';')
-membres.each do |membre|
-    data_membre = JSON.parse(membre)
-    puts "#{data_membre["titre"]} : #{data_membre["nom"]} (#{data_membre["age"]} an(s))"
+def liste
+    file = File.read("livret.json")
+    membres = file.split(';')
+    membres.each do |membre|
+        data_membre = JSON.parse(membre)
+        puts "#{data_membre["titre"]} : #{data_membre["nom"]} (#{data_membre["age"]} an(s))"
+    end
 end
+
+#Affichage de la liste existante
+liste
 
 puts "Désirez-vous ajouter un nouveau membre au livret de famille ? (y/n)"
 answer = gets.chomp.upcase
@@ -31,12 +35,7 @@ while answer == "Y"
     nouveau_membre.sauvegarde
 
     #Affichage de la liste existante
-    file = File.read("livret.json")
-    membres = file.split(';')
-    membres.each do |membre|
-        data_membre = JSON.parse(membre)
-        puts "#{data_membre["titre"]} : #{data_membre["nom"]} (#{data_membre["age"]} an(s))"
-    end
+    liste
 
     puts "Désirez-vous ajouter un autre membre ? (y/n)"
     again = gets.chomp.upcase
