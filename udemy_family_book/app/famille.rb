@@ -21,7 +21,7 @@ class Famille
         }.to_json
 
         open("livret.json", "a") do |fichier|
-            fichier.puts membre_input + ","
+            fichier.puts ";" + membre_input
         end
     end
 end
