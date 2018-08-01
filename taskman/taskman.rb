@@ -17,19 +17,6 @@ OPTIONS_DEFAULT = {
     date: nil
 }
 
-def parser_command command
-    case command
-    when "add"
-        $tableau_taches << ajouter(ARGV)
-    when "mod"
-        puts "Commande MOD"
-    when "del"
-        supprimer(ARGV.shift.to_i)
-    else
-        puts "Commande non reconnue"
-    end
-end
-
 def afficher
     puts "*****TASKMAN*****"
     puts "LISTE DES TACHES"
@@ -67,8 +54,56 @@ def ajouter params
     tache
 end
 
-#Récupération du premier argument et mise en minuscule
-command = ARGV.shift.downcase
+def afficher_aide
+    puts "taskman [commande] [contenu] [options....]"
+    puts "------------------------------------------"
+    $commandes.each do |k, v|
+        puts "#{v[:keyword]} #{v[:arguments]}\t * #{v[:description]}"
+    end
+end
 
-parser_command(command)
+$commandes = {}
+
+def register_command command, arguments, description, &block
+    $commandes[command] = {
+        keyword: command,
+        arguments: arguments,
+        description: description,
+        block: block
+    }
+end
+
+def lancer_commande!
+    $command = ARGV.shift
+    commande_execute = false
+    $commandes.each do |k, v|
+        if k == $command
+            commande_execute = true
+            v[:block].call(ARGV)
+        end
+    end
+
+    if not commande_execute #or unless
+        afficher_aide
+    end
+end
+
+register_command 'add', ':contenu (options...)', 'Crée une nouvelle tâche.' do |arguments|
+    $tableau_taches << ajouter(arguments)
+end
+register_command 'del', ':id', 'Supprimer une tache.' do |arguments|
+    supprimer arguments.shift.to_i
+end
+register_command 'mod', ':id (options...)', 'Modifie une tache.' do |arguments|
+    puts "Commande MOD"
+end
+register_command 'list', ':filtre', 'Liste les taches.' do |arguments|
+    afficher
+end
+register_command 'clear', '', 'Supprimer toute les taches.' do |arguments|
+    #A FAIRE : Supprimer toute les taches
+end
+
+lancer_commande!
+
 afficher
