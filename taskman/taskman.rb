@@ -6,56 +6,66 @@
 #Utilisation de p plutôt que puts pour conserver la forme de tableau à l'affichage
 #p ARGV
 
-module Task
+class Task
     OPTIONS_DEFAULT = {
         flags: [],
         date: nil
     }
 
-    #Initialisation du tableau des taches
-    @tableau_taches = [
-        {id: 0, :content => "Ameliorer taskman", flags: %w(important urgent)}
-    ]
+    attr_accessor :id, :content, :flags
+    attr_reader :is_done
 
-    def self.supprimer id
-        @tableau_taches = @tableau_taches.reject{|tache| tache[:id] == id.to_i}
-        #ou @tableau_taches.reject!{|tache| tache[:id] == id.to_i}
+    def initialize id, content, opts = {}
+        opts = OPTIONS_DEFAULT.merge(opts)
+
+        @id = id
+        @content = content
+        @flags = opts[:flags]
+        @is_done = false
     end
-    
+
+    def afficher
+        puts "[#{@is_done ? "X" : " "}]#{@id} - #{@content} (#{@flags.join(" ")})"
+    end
+
+    def done
+        @is_done = true
+    end
+
     def self.ajouter params
-        commande = params.shift
-    
-        tache = {}
-    
-        tache[:id] = @tableau_taches.map{ |tache| tache[:id] }.max + 1
-    
-        
-        tache.merge!(Task::OPTIONS_DEFAULT)
-    
-        tache[:content] = commande
+        contenu = params.shift
+        id = @tableau_taches.map(&:id).max + 1
+        #id = @tableau_taches.map{ |tache| tache.id }.max + 1
+
+        new_task = Task.new id, contenu
     
         params.each do |argument|
             champ, valeur = argument.split(':')
             if champ == "flags"
-                tache[champ.to_sym] = valeur.split(",")
+                new_task.flags = valeur.split(',')
             else
-                tache[champ.to_sym] = valeur
+                raise "Parametre incorrect : #{champ}"
             end
         end
     
-        @tableau_taches << tache
+        @tableau_taches << new_task
+    end
+    
+    def self.supprimer id
+        @tableau_taches = @tableau_taches.reject{|tache| tache.id == id.to_i}
     end
 
     def self.afficher
         puts "*****TASKMAN*****"
         puts "LISTE DES TACHES"
-    
-        @tableau_taches.each do |tache|
-            puts "#{tache[:id]} - #{tache[:content]} (#{tache[:flags].join(" ")})"
-        end
+        @tableau_taches.each(&:afficher)
     end
-end
 
+    #Initialisation du tableau des taches
+    @tableau_taches = [
+        Task.new(0, "Améliorer taskman", flags: %w(important urgent))
+    ]
+end
 
 module Commande
     @commandes = {}
