@@ -1,5 +1,3 @@
-require 'json'
-
 class Task
     OPTIONS_DEFAULT = {
         flags: [],
@@ -28,7 +26,7 @@ class Task
     end
 
     def afficher
-        puts "[#{@is_done ? "X" : " "}]#{@id} - #{@content} (#{@flags.join(" ")})"
+        puts "[#{@is_done ? "X".green : ".".red}]#{@id.to_s.light_blue} - #{@content.bold.white} (#{@flags.join(" ")})"
     end
 
     def done
@@ -80,8 +78,8 @@ class Task
     end
 
     def self.afficher
-        puts "*****TASKMAN*****"
-        puts "LISTE DES TACHES"
+        puts "*****TASKMAN*****".bold.white
+        puts "LISTE DES TACHES".bold.white
         @tableau_taches.each(&:afficher)
     end
 

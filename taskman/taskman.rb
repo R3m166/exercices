@@ -5,6 +5,9 @@
 #Retourne les arguments d'appel du fichier dans un tableau 'ARGV'
 #Utilisation de p plutôt que puts pour conserver la forme de tableau à l'affichage
 #p ARGV
+require 'bundler'
+
+Bundler.require
 
 TM_PATH = File.expand_path(File.join(__FILE__, ".."))
 
