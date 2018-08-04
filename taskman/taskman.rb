@@ -6,6 +6,8 @@
 #Utilisation de p plutôt que puts pour conserver la forme de tableau à l'affichage
 #p ARGV
 
+require 'json'
+
 class Task
     OPTIONS_DEFAULT = {
         flags: [],
@@ -15,13 +17,22 @@ class Task
     attr_accessor :id, :content, :flags
     attr_reader :is_done
 
-    def initialize id, content, opts = {}
+    def initialize id, content, opts = {}, is_done = false
         opts = OPTIONS_DEFAULT.merge(opts)
 
         @id = id
         @content = content
         @flags = opts[:flags]
-        @is_done = false
+        @is_done = is_done 
+    end
+
+    def to_json opts={}
+       {
+           id: @id,
+           content: @content,
+           flags: @flags,
+           is_done: @is_done
+       }.to_json(opts)
     end
 
     def afficher
@@ -59,6 +70,23 @@ class Task
         @tableau_taches = @tableau_taches.reject{|tache| tache.id == id.to_i}
     end
 
+    #Charge les taches depuis un fichier JSON
+    def self.load file
+        str = File.read(file)
+        tableau = JSON.parse(str)
+
+        @tableau_taches =  tableau.map do |tache|
+            Task.new(tache["id"], tache["content"], { flags: tache["flags"] }, true)
+        end
+    end
+
+    #Charge les taches depuis un fichier JSON
+    def self.save file
+        File.open(file, "w") do |file|
+            file.write(@tableau_taches.to_json)
+        end
+    end
+
     def self.afficher
         puts "*****TASKMAN*****"
         puts "LISTE DES TACHES"
@@ -66,9 +94,7 @@ class Task
     end
 
     #Initialisation du tableau des taches
-    @tableau_taches = [
-        Task.new(0, "Améliorer taskman", flags: %w(important urgent))
-    ]
+    @tableau_taches = []
 end
 
 module Commande
@@ -147,6 +173,7 @@ module Commande
     end
 end
 
+Task.load("tasks.json")
 
 Commande::Action.new('add', ':contenu (options...)', 'Crée une nouvelle tâche.') do |arguments|
     Task.ajouter(arguments)
@@ -170,3 +197,5 @@ end.register!
 Commande.lancer!
 
 Task.afficher
+
+Task.save("tasks.json")
