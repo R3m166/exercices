@@ -11,6 +11,7 @@ Bundler.require
 
 TM_PATH = File.expand_path(File.join(__FILE__, ".."))
 
+require_relative "#{TM_PATH}/lib/ext"
 require_relative "#{TM_PATH}/lib/commande"
 require_relative "#{TM_PATH}/lib/task"
 
