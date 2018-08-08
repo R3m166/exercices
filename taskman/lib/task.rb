@@ -1,18 +1,55 @@
+require 'time'
+
 class Task
     OPTIONS_DEFAULT = {
-        flags: [],
-        date: nil
+        flags: []
     }
 
-    attr_accessor :id, :content, :flags
+    attr_accessor :id, :content, :flags, :date
     attr_reader :is_done
+
+    def flags= x
+        if x
+            if x.is_a?(Array)
+                @flags = x
+            elsif x.is_a?(String)
+                @flags = x.split(',')
+            else
+                raise "flags= #{x.class} impossible"
+            end
+        else
+            @flags = x
+        end
+    end
+
+    def date= x
+        if x
+            if x.is_a?(Date)
+                @date = x
+            elsif x.is_a?(String)
+                @date = Time.parse(x)
+            else
+                raise "date= #{x.class} impossible"
+            end
+        else
+            @date = x
+        end
+    end
 
     def initialize id, content, opts = {}, is_done = false
         opts = OPTIONS_DEFAULT.merge(opts)
 
         @id = id
         @content = content
-        @flags = opts[:flags]
+
+        opts.each do |k, v|
+            if respond_to?("#{k}=")
+                send("#{k}=", v)
+            else
+                raise "Je ne connait pas ce champ : #{k}."
+            end
+        end
+
         @is_done = is_done 
     end
 
@@ -21,12 +58,13 @@ class Task
            id: @id,
            content: @content,
            flags: @flags,
-           is_done: @is_done
+           is_done: @is_done,
+           date: @date
        }.to_json(opts)
     end
 
     def afficher
-        puts "[#{@is_done ? "X".green : ".".red}]#{@id.to_s.light_blue} - #{@content.bold.white} (#{@flags.join(" ")})"
+        puts "[#{@is_done ? "X".green : ".".red}]#{@id.to_s.light_blue} - #{@content.bold.white} (#{@flags.join(" ")}) #{@date.nil? ? "" : @date.strftime("%Y-%m-%d")}"
     end
 
     def done
@@ -38,16 +76,13 @@ class Task
         id = @tableau_taches.map(&:id).max + 1
         #id = @tableau_taches.map{ |tache| tache.id }.max + 1
 
-        new_task = Task.new id, contenu
-    
-        params.each do |argument|
-            champ, valeur = argument.split(':')
-            if champ == "flags"
-                new_task.flags = valeur.split(',')
-            else
-                raise "Parametre incorrect : #{champ}"
-            end
+        hash = {}
+        params.each do |param|
+            k, v = param.split(':')
+            hash[k.to_sym] = v
         end
+
+        new_task = Task.new id, contenu, hash
     
         @tableau_taches << new_task
     end
@@ -66,7 +101,8 @@ class Task
         tableau = JSON.parse(str)
 
         @tableau_taches =  tableau.map do |tache|
-            Task.new(tache["id"], tache["content"], { flags: tache["flags"] }, true)
+            opts = tache.reject{|k,v|["id", "content", "is_done"].include?(k) }
+            Task.new(tache["id"], tache["content"], opts, tache["is_done"])
         end
     end
 
