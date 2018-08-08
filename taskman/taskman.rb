@@ -16,23 +16,21 @@ require_relative "#{TM_PATH}/lib/task"
 
 Task.load("#{TM_PATH}/conf/tasks.json")
 
-Commande::Action.new('add', ':contenu (options...)', 'Crée une nouvelle tâche.') do |arguments|
-    Task.ajouter(arguments)
-end.register!
+Commande.define do
 
-Commande::TaskAction.new('del', '', 'Supprimer une tache.') do |task, args|
-    Task.supprimer task.id
-end.register!
+    args ":contenu (options..)"
+    desc "Créer une nouvelle tache"
+    action :add do |arguments|
+        Task.ajouter arguments
+    end
 
-#Commande.register 'mod', ':id (options...)', 'Modifie une tache.' do |arguments|
-#    puts "Commande MOD"
-#end
-#Commande.register 'list', ':filtre', 'Liste les taches.' do |arguments|
-#    Task.afficher
-#end
-#Commande.register 'clear', '', 'Supprimer toute les taches.' do |arguments|
-#    #A FAIRE : Supprimer toute les taches
-#end
+    args ""
+    desc "Supprime une tache"
+    task_action :del do |task, arguments|
+        Task.supprimer task.id
+    end
+
+end
 
 Commande.lancer!
 
