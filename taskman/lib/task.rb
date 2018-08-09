@@ -73,8 +73,12 @@ class Task
 
     def self.ajouter params
         contenu = params.shift
-        id = @tableau_taches.map(&:id).max + 1
+        id = (@tableau_taches.map(&:id).max || -1) + 1
         #id = @tableau_taches.map{ |tache| tache.id }.max + 1
+
+        if contenu.nil?
+            raise TaskmanError,  "Add a besoin d'un parametre!!!!!"
+        end
 
         hash = {}
         params.each do |param|
@@ -113,10 +117,26 @@ class Task
         end
     end
 
-    def self.afficher
+    def self.clear
+        @tableau_taches = []
+    end
+
+    def self.afficher filtre={}
         puts "*****TASKMAN*****".bold.white
         puts "LISTE DES TACHES".bold.white
-        @tableau_taches.each(&:afficher)
+
+        @tableau_taches.reject do |t|
+            x = filtre.map do |k, v|
+                valeur_tache = t.send(k)
+
+                if valeur_tache.is_a?(Array)
+                    valeur_tache.include?(v)
+                else
+                    !!(valeur_tache.to_s =~ /^#{v}/)
+                end
+            end
+            x.uniq.include?(false)
+        end.each(&:afficher)
     end
 
     #Initialisation du tableau des taches

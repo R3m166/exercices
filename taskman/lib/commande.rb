@@ -39,7 +39,13 @@ module Commande
         end
 
         def apply arguments
-            block.call(arguments)
+            begin
+                block.call(arguments)
+            rescue TaskmanError => e
+                puts "ERREUR : #{e.message.light_red.bold}"
+            rescue => e
+                puts "Une erreur ruby!"
+            end
         end
 
         def register!
@@ -65,7 +71,13 @@ module Commande
                 exit
             end
 
-            block.call(task, arguments)
+            begin
+                block.call(task, arguments)
+            rescue TaskmanError => e
+                puts "ERREUR : #{e.message.light_red.bold}"
+            rescue => e
+                puts "Une erreur ruby!"
+            end
         end
 
         def to_s
